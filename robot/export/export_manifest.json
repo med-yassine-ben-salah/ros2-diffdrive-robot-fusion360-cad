@@ -1,0 +1,198 @@
+{
+  "parts": [
+    {
+      "name": "Lower_Chassis",
+      "stl": "C:\\Users\\yassine\\Desktop\\antigravity_ws_2\\FreeCAD_ws\\robot\\export\\Lower_Chassis.stl",
+      "stl_print_oriented": "C:\\Users\\yassine\\Desktop\\antigravity_ws_2\\FreeCAD_ws\\robot\\export\\Lower_Chassis_print_oriented.stl",
+      "step": "C:\\Users\\yassine\\Desktop\\antigravity_ws_2\\FreeCAD_ws\\robot\\export\\Lower_Chassis.step",
+      "stl_bytes": 277684,
+      "step_bytes": 689434,
+      "facets": 5552,
+      "is_watertight": true,
+      "volume_brep_mm3": 330935.4,
+      "volume_mesh_mm3": 330841.7,
+      "est_mass_pla_g": 172.4,
+      "bed_bbox_mm": [
+        250.0,
+        150.0,
+        47.0
+      ],
+      "fits_bambu_a1": true,
+      "print_orientation": "Upright (+Z up): flat 250x150 mm bottom plate (Z=14.0 mm) on build plate",
+      "total_area_mm2": 179842.8,
+      "bed_contact_area_mm2": 34376.2,
+      "overhang_area_mm2": 7301.3
+    },
+    {
+      "name": "Battery_Door",
+      "stl": "C:\\Users\\yassine\\Desktop\\antigravity_ws_2\\FreeCAD_ws\\robot\\export\\Battery_Door.stl",
+      "stl_print_oriented": "C:\\Users\\yassine\\Desktop\\antigravity_ws_2\\FreeCAD_ws\\robot\\export\\Battery_Door_print_oriented.stl",
+      "step": "C:\\Users\\yassine\\Desktop\\antigravity_ws_2\\FreeCAD_ws\\robot\\export\\Battery_Door.step",
+      "stl_bytes": 32484,
+      "step_bytes": 106451,
+      "facets": 648,
+      "is_watertight": true,
+      "volume_brep_mm3": 5322.1,
+      "volume_mesh_mm3": 5320.2,
+      "est_mass_pla_g": 2.8,
+      "bed_bbox_mm": [
+        65.1,
+        36.8,
+        3.0
+      ],
+      "fits_bambu_a1": true,
+      "print_orientation": "Laid flat on inner face (+Y face down on bed): 61.4 x 36.8 mm footprint, 3.0 mm tall, 0.0 mm2 overhang, zero supports",
+      "total_area_mm2": 4766.7,
+      "bed_contact_area_mm2": 1898.4,
+      "overhang_area_mm2": 0.0
+    },
+    {
+      "name": "Caster_Socket_Housing",
+      "stl": "C:\\Users\\yassine\\Desktop\\antigravity_ws_2\\FreeCAD_ws\\robot\\export\\Caster_Socket_Housing.stl",
+      "stl_print_oriented": "C:\\Users\\yassine\\Desktop\\antigravity_ws_2\\FreeCAD_ws\\robot\\export\\Caster_Socket_Housing_print_oriented.stl",
+      "step": "C:\\Users\\yassine\\Desktop\\antigravity_ws_2\\FreeCAD_ws\\robot\\export\\Caster_Socket_Housing.step",
+      "stl_bytes": 74684,
+      "step_bytes": 58971,
+      "facets": 1492,
+      "is_watertight": true,
+      "volume_brep_mm3": 4750.3,
+      "volume_mesh_mm3": 4748.5,
+      "est_mass_pla_g": 2.5,
+      "bed_bbox_mm": [
+        38.0,
+        38.0,
+        7.8
+      ],
+      "fits_bambu_a1": true,
+      "print_orientation": "Flipped (-Z up): flat \u00d838 mm mounting flange (Z=14.0 mm) on build plate, 0.0 mm2 overhang, zero supports",
+      "total_area_mm2": 3160.2,
+      "bed_contact_area_mm2": 1010.7,
+      "overhang_area_mm2": 0.0
+    },
+    {
+      "name": "Electronics_Deck",
+      "stl": "C:\\Users\\yassine\\Desktop\\antigravity_ws_2\\FreeCAD_ws\\robot\\export\\Electronics_Deck.stl",
+      "stl_print_oriented": "C:\\Users\\yassine\\Desktop\\antigravity_ws_2\\FreeCAD_ws\\robot\\export\\Electronics_Deck_print_oriented.stl",
+      "step": "C:\\Users\\yassine\\Desktop\\antigravity_ws_2\\FreeCAD_ws\\robot\\export\\Electronics_Deck.step",
+      "stl_bytes": 316984,
+      "step_bytes": 415686,
+      "facets": 6338,
+      "is_watertight": true,
+      "volume_brep_mm3": 157584.4,
+      "volume_mesh_mm3": 157580.9,
+      "est_mass_pla_g": 82.1,
+      "bed_bbox_mm": [
+        250.0,
+        150.0,
+        20.4
+      ],
+      "fits_bambu_a1": true,
+      "print_orientation": "Upright (+Z up): 100% flat 250x150 mm bottom face (Z=61.0 mm) on build plate, zero supports",
+      "total_area_mm2": 86439.0,
+      "bed_contact_area_mm2": 34299.5,
+      "overhang_area_mm2": 1100.0
+    },
+    {
+      "name": "LiDAR_Pillar_Clamps",
+      "stl": "C:\\Users\\yassine\\Desktop\\antigravity_ws_2\\FreeCAD_ws\\robot\\export\\LiDAR_Pillar_Clamps.stl",
+      "stl_print_oriented": "C:\\Users\\yassine\\Desktop\\antigravity_ws_2\\FreeCAD_ws\\robot\\export\\LiDAR_Pillar_Clamps_print_oriented.stl",
+      "step": "C:\\Users\\yassine\\Desktop\\antigravity_ws_2\\FreeCAD_ws\\robot\\export\\LiDAR_Pillar_Clamps.step",
+      "stl_bytes": 22484,
+      "step_bytes": 29416,
+      "facets": 448,
+      "is_watertight": true,
+      "volume_brep_mm3": 1769.4,
+      "volume_mesh_mm3": 1770.6,
+      "est_mass_pla_g": 0.9,
+      "bed_bbox_mm": [
+        88.0,
+        84.0,
+        3.0
+      ],
+      "fits_bambu_a1": true,
+      "print_orientation": "Upright (+Z up): 4x flat 12x13 mm clamp caps on build plate, zero supports",
+      "total_area_mm2": 1904.0,
+      "bed_contact_area_mm2": 589.8,
+      "overhang_area_mm2": 0.0
+    },
+    {
+      "name": "Upper_Enclosure",
+      "stl": "C:\\Users\\yassine\\Desktop\\antigravity_ws_2\\FreeCAD_ws\\robot\\export\\Upper_Enclosure.stl",
+      "stl_print_oriented": "C:\\Users\\yassine\\Desktop\\antigravity_ws_2\\FreeCAD_ws\\robot\\export\\Upper_Enclosure_print_oriented.stl",
+      "step": "C:\\Users\\yassine\\Desktop\\antigravity_ws_2\\FreeCAD_ws\\robot\\export\\Upper_Enclosure.step",
+      "stl_bytes": 501484,
+      "step_bytes": 1279915,
+      "facets": 10028,
+      "is_watertight": true,
+      "volume_brep_mm3": 223976.5,
+      "volume_mesh_mm3": 223942.4,
+      "est_mass_pla_g": 116.6,
+      "bed_bbox_mm": [
+        250.0,
+        150.0,
+        47.0
+      ],
+      "fits_bambu_a1": true,
+      "print_orientation": "Flipped upside-down (-Z up): flat 250x150 mm top roof (Z=112.0 mm) on build plate, zero roof bridging",
+      "total_area_mm2": 147008.9,
+      "bed_contact_area_mm2": 27462.5,
+      "overhang_area_mm2": 3228.9
+    },
+    {
+      "name": "UI_Button_Carrier",
+      "stl": "C:\\Users\\yassine\\Desktop\\antigravity_ws_2\\FreeCAD_ws\\robot\\export\\UI_Button_Carrier.stl",
+      "stl_print_oriented": "C:\\Users\\yassine\\Desktop\\antigravity_ws_2\\FreeCAD_ws\\robot\\export\\UI_Button_Carrier_print_oriented.stl",
+      "step": "C:\\Users\\yassine\\Desktop\\antigravity_ws_2\\FreeCAD_ws\\robot\\export\\UI_Button_Carrier.step",
+      "stl_bytes": 52284,
+      "step_bytes": 99793,
+      "facets": 1044,
+      "is_watertight": true,
+      "volume_brep_mm3": 8182.7,
+      "volume_mesh_mm3": 8180.2,
+      "est_mass_pla_g": 4.3,
+      "bed_bbox_mm": [
+        52.0,
+        52.0,
+        4.15
+      ],
+      "fits_bambu_a1": true,
+      "print_orientation": "Upright (+Z up): flat 52x52 mm bottom face on build plate, zero supports",
+      "total_area_mm2": 6063.4,
+      "bed_contact_area_mm2": 2168.5,
+      "overhang_area_mm2": 0.0
+    },
+    {
+      "name": "ESP32_CAM_Bracket",
+      "stl": "C:\\Users\\yassine\\Desktop\\antigravity_ws_2\\FreeCAD_ws\\robot\\export\\ESP32_CAM_Bracket.stl",
+      "stl_print_oriented": "C:\\Users\\yassine\\Desktop\\antigravity_ws_2\\FreeCAD_ws\\robot\\export\\ESP32_CAM_Bracket_print_oriented.stl",
+      "step": "C:\\Users\\yassine\\Desktop\\antigravity_ws_2\\FreeCAD_ws\\robot\\export\\ESP32_CAM_Bracket.step",
+      "stl_bytes": 21884,
+      "step_bytes": 27390,
+      "facets": 436,
+      "is_watertight": true,
+      "volume_brep_mm3": 4625.5,
+      "volume_mesh_mm3": 4631.9,
+      "est_mass_pla_g": 2.4,
+      "bed_bbox_mm": [
+        18.25,
+        50.0,
+        11.0
+      ],
+      "fits_bambu_a1": true,
+      "print_orientation": "Upright (+Z up): flat U-bracket bottom face (Z=81.0 mm) on build plate, zero supports",
+      "total_area_mm2": 3212.3,
+      "bed_contact_area_mm2": 470.0,
+      "overhang_area_mm2": 0.0
+    }
+  ],
+  "assembly_step": {
+    "path": "C:\\Users\\yassine\\Desktop\\antigravity_ws_2\\FreeCAD_ws\\robot\\export\\ROS2_DiffDrive_Robot_Assembly.step",
+    "bytes": 42856577,
+    "objects": 28
+  },
+  "fcstd": {
+    "root": "C:\\Users\\yassine\\Desktop\\antigravity_ws_2\\FreeCAD_ws\\robot\\ROS2_DiffDrive_Robot.FCStd",
+    "export": "C:\\Users\\yassine\\Desktop\\antigravity_ws_2\\FreeCAD_ws\\robot\\export\\ROS2_DiffDrive_Robot.FCStd",
+    "bytes": 18825071
+  }
+}

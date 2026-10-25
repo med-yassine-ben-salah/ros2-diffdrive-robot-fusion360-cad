@@ -1,0 +1,680 @@
+<?xml version="1.0"?>
+<!-- =================================================================================== -->
+<!-- ROS 2 URDF/XACRO Description: ros2_diffdrive_robot                                  -->
+<!-- Generated from verified FreeCAD assembly (ROS2_DiffDrive_Robot.FCStd)               -->
+<!-- Compatible with my_bot ros2_control, EKF, SLAM Toolbox, Nav2, and Gazebo Classic    -->
+<!-- =================================================================================== -->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="ros2_diffdrive_robot">
+
+  <!-- ========================== 1. XACRO ARGUMENTS ========================== -->
+  <!-- use_ros2_control = true  -> drive via ros2_control (GazeboSystem in sim,
+                                   my_bot_hardware/MyBotSystem on the real robot)
+                        = false -> legacy gazebo_ros_diff_drive plugin
+       use_sim          = true  -> Gazebo Classic hardware backend -->
+  <xacro:arg name="use_ros2_control" default="true"/>
+  <xacro:arg name="use_sim" default="false"/>
+  <xacro:arg name="publish_odom_tf" default="true"/>
+
+  <!-- ========================== 2. XACRO PROPERTIES ========================= -->
+  <!-- Drive wheels: Ø65.0 mm x 26.0 mm rubber tire, 181.0 mm center-to-center track -->
+  <xacro:property name="wheel_radius"     value="0.0325"/>
+  <xacro:property name="wheel_width"      value="0.0260"/>
+  <xacro:property name="wheel_mass"       value="0.045"/>
+  <xacro:property name="wheel_separation" value="0.1810"/>
+  <xacro:property name="wheel_x_offset"   value="0.0000"/>
+  <xacro:property name="ticks_per_rev"    value="1400"/>
+
+  <!-- Derived wheel cylinder inertia -->
+  <xacro:property name="wheel_I_axial" value="${0.5 * wheel_mass * wheel_radius * wheel_radius}"/>
+  <xacro:property name="wheel_I_perp"  value="${(1.0/12.0) * wheel_mass * (3.0*wheel_radius*wheel_radius + wheel_width*wheel_width)}"/>
+
+  <!-- JGA25-371 geared DC motor with encoder (Ø25 x 75 mm, gearbox face at |Y| = 69.8 mm) -->
+  <xacro:property name="motor_mass"     value="0.085"/>
+  <xacro:property name="motor_y_offset" value="0.0698"/>
+
+  <!-- Front 5/8" (15.875 mm) steel ball caster at (X = +165.0 mm, Y = 0.0 mm) -->
+  <xacro:property name="caster_radius"   value="0.0079375"/>
+  <xacro:property name="caster_mass"     value="0.016"/>
+  <xacro:property name="caster_I"        value="${(2.0/5.0) * caster_mass * caster_radius * caster_radius}"/>
+  <xacro:property name="caster_x_offset" value="0.1650"/>
+  <xacro:property name="base_z_offset"   value="${wheel_radius}"/>
+  <xacro:property name="caster_z_offset" value="${caster_radius - wheel_radius}"/>
+
+  <!-- Chassis envelope (250 x 150 mm, Z in [14.0, 112.0] mm -> 98.0 mm height) -->
+  <xacro:property name="base_length" value="0.2500"/>
+  <xacro:property name="base_width"  value="0.1500"/>
+  <xacro:property name="base_height" value="0.0980"/>
+
+  <!-- MPU9250 9-axis IMU at exact support-triangle centroid (X = +55.0 mm, Y = 0.0 mm, Z = 69.14 mm) -->
+  <xacro:property name="imu_length"   value="0.02615"/>
+  <xacro:property name="imu_width"    value="0.01560"/>
+  <xacro:property name="imu_height"   value="0.01172"/>
+  <xacro:property name="imu_x_offset" value="0.05500"/>
+  <xacro:property name="imu_z_offset" value="0.03664"/>
+
+  <!-- Front ESP32-CAM + MB (lens at X = +194.5 mm, Y = 0.0 mm, Z = 98.5 mm) -->
+  <xacro:property name="cam_wid"      value="0.0291"/>
+  <xacro:property name="cam_hgt"      value="0.0401"/>
+  <xacro:property name="cam_thk"      value="0.0231"/>
+  <xacro:property name="cam_x_offset" value="0.1945"/>
+  <xacro:property name="cam_z_offset" value="0.0660"/>
+
+  <!-- LDS02RR 360-deg LiDAR (turret axis collinear with rear axle X=0, Y=0; laser plane Z = 119.25 mm) -->
+  <xacro:property name="lidar_x_offset"    value="0.00000"/>
+  <xacro:property name="lidar_z_offset"    value="0.08675"/>
+  <xacro:property name="lidar_body_radius" value="0.03500"/>
+  <xacro:property name="lidar_body_len"    value="0.01500"/>
+
+  <!-- ============================= 3. MATERIALS ============================= -->
+  <material name="industrial_slate_blue"> <color rgba="0.20 0.26 0.35 1.0"/> </material>
+  <material name="chassis_dark_blue">     <color rgba="0.18 0.24 0.32 1.0"/> </material>
+  <material name="deck_steel_blue">       <color rgba="0.24 0.30 0.38 1.0"/> </material>
+  <material name="door_hatch_blue">       <color rgba="0.25 0.33 0.42 1.0"/> </material>
+  <material name="matte_black_rubber">    <color rgba="0.15 0.15 0.16 1.0"/> </material>
+  <material name="brushed_aluminum">      <color rgba="0.70 0.72 0.75 1.0"/> </material>
+  <material name="chrome_steel">          <color rgba="0.82 0.84 0.88 1.0"/> </material>
+  <material name="battery_green">         <color rgba="0.22 0.50 0.30 1.0"/> </material>
+  <material name="pcb_blue">              <color rgba="0.15 0.35 0.65 1.0"/> </material>
+  <material name="switch_red">            <color rgba="0.78 0.18 0.18 1.0"/> </material>
+
+  <!-- ========================== 4. BASE FOOTPRINT =========================== -->
+  <link name="base_footprint"/>
+
+  <joint name="base_footprint_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0.0 0.0 ${base_z_offset}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ============================= 5. BASE LINK ============================= -->
+  <link name="base_link">
+    <visual name="lower_chassis_visual">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://ros2_diffdrive_description/meshes/lower_chassis.stl" scale="1.0 1.0 1.0"/>
+      </geometry>
+      <material name="chassis_dark_blue"/>
+    </visual>
+
+    <visual name="electronics_deck_visual">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://ros2_diffdrive_description/meshes/electronics_deck.stl" scale="1.0 1.0 1.0"/>
+      </geometry>
+      <material name="deck_steel_blue"/>
+    </visual>
+
+    <visual name="upper_enclosure_visual">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://ros2_diffdrive_description/meshes/upper_enclosure.stl" scale="1.0 1.0 1.0"/>
+      </geometry>
+      <material name="industrial_slate_blue"/>
+    </visual>
+
+    <visual name="drivetrain_static_visual">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://ros2_diffdrive_description/meshes/drivetrain_static.stl" scale="1.0 1.0 1.0"/>
+      </geometry>
+      <material name="brushed_aluminum"/>
+    </visual>
+
+    <visual name="battery_pack_visual">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://ros2_diffdrive_description/meshes/battery_pack.stl" scale="1.0 1.0 1.0"/>
+      </geometry>
+      <material name="battery_green"/>
+    </visual>
+
+    <visual name="ui_caps_visual">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://ros2_diffdrive_description/meshes/ui_switches_caps.stl" scale="1.0 1.0 1.0"/>
+      </geometry>
+      <material name="matte_black_rubber"/>
+    </visual>
+
+    <visual name="ui_oled_visual">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://ros2_diffdrive_description/meshes/ui_oled_switches.stl" scale="1.0 1.0 1.0"/>
+      </geometry>
+      <material name="pcb_blue"/>
+    </visual>
+
+    <visual name="red_accents_visual">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://ros2_diffdrive_description/meshes/red_accents.stl" scale="1.0 1.0 1.0"/>
+      </geometry>
+      <material name="switch_red"/>
+    </visual>
+
+    <collision name="base_collision">
+      <origin xyz="0.070 0.0 0.0305" rpy="0 0 0"/>
+      <geometry>
+        <box size="${base_length} ${base_width} ${base_height}"/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <origin xyz="0.055 0.0 0.025" rpy="0 0 0"/>
+      <mass value="1.280"/>
+      <inertia ixx="0.0038" ixy="0.0" ixz="0.0" iyy="0.0082" iyz="0.0" izz="0.0098"/>
+    </inertial>
+  </link>
+
+  <!-- ========================= 6. LEFT DRIVE WHEEL ========================= -->
+  <link name="left_wheel_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://ros2_diffdrive_description/meshes/left_wheel.stl" scale="1.0 1.0 1.0"/>
+      </geometry>
+      <material name="matte_black_rubber"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.5707963 0 0"/>
+      <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="${wheel_mass}"/>
+      <inertia ixx="${wheel_I_perp}"  ixy="0.0" ixz="0.0"
+               iyy="${wheel_I_axial}" iyz="0.0"
+               izz="${wheel_I_perp}"/>
+    </inertial>
+  </link>
+
+  <joint name="left_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="left_wheel_link"/>
+    <origin xyz="${wheel_x_offset} ${wheel_separation / 2.0} 0.0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <dynamics damping="0.01" friction="0.0"/>
+  </joint>
+
+  <!-- ========================= 7. RIGHT DRIVE WHEEL ======================== -->
+  <link name="right_wheel_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://ros2_diffdrive_description/meshes/right_wheel.stl" scale="1.0 1.0 1.0"/>
+      </geometry>
+      <material name="matte_black_rubber"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.5707963 0 0"/>
+      <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="${wheel_mass}"/>
+      <inertia ixx="${wheel_I_perp}"  ixy="0.0" ixz="0.0"
+               iyy="${wheel_I_axial}" iyz="0.0"
+               izz="${wheel_I_perp}"/>
+    </inertial>
+  </link>
+
+  <joint name="right_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="right_wheel_link"/>
+    <origin xyz="${wheel_x_offset} -${wheel_separation / 2.0} 0.0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <dynamics damping="0.01" friction="0.0"/>
+  </joint>
+
+  <!-- =================== 8. LEFT & RIGHT JGA25-371 MOTORS ================== -->
+  <link name="left_motor_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://ros2_diffdrive_description/meshes/left_motor.stl" scale="1.0 1.0 1.0"/>
+      </geometry>
+      <material name="brushed_aluminum"/>
+    </visual>
+    <collision>
+      <origin xyz="0 -0.030 0" rpy="1.5707963 0 0"/>
+      <geometry>
+        <cylinder radius="0.0125" length="0.063"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 -0.030 0" rpy="0 0 0"/>
+      <mass value="${motor_mass}"/>
+      <inertia ixx="2.8e-05" ixy="0.0" ixz="0.0" iyy="6.6e-06" iyz="0.0" izz="2.8e-05"/>
+    </inertial>
+  </link>
+
+  <joint name="left_motor_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="left_motor_link"/>
+    <origin xyz="${wheel_x_offset} ${motor_y_offset} 0.0" rpy="0 0 0"/>
+  </joint>
+
+  <link name="right_motor_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://ros2_diffdrive_description/meshes/right_motor.stl" scale="1.0 1.0 1.0"/>
+      </geometry>
+      <material name="brushed_aluminum"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0.030 0" rpy="1.5707963 0 0"/>
+      <geometry>
+        <cylinder radius="0.0125" length="0.063"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0.030 0" rpy="0 0 0"/>
+      <mass value="${motor_mass}"/>
+      <inertia ixx="2.8e-05" ixy="0.0" ixz="0.0" iyy="6.6e-06" iyz="0.0" izz="2.8e-05"/>
+    </inertial>
+  </link>
+
+  <joint name="right_motor_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="right_motor_link"/>
+    <origin xyz="${wheel_x_offset} -${motor_y_offset} 0.0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ========================= 9. FRONT BALL CASTER ======================== -->
+  <link name="caster_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://ros2_diffdrive_description/meshes/caster_ball.stl" scale="1.0 1.0 1.0"/>
+      </geometry>
+      <material name="chrome_steel"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="${caster_radius}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="${caster_mass}"/>
+      <inertia ixx="${caster_I}" ixy="0.0" ixz="0.0"
+               iyy="${caster_I}" iyz="0.0"
+               izz="${caster_I}"/>
+    </inertial>
+  </link>
+
+  <joint name="caster_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="caster_link"/>
+    <origin xyz="${caster_x_offset} 0.0 ${caster_z_offset}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ==================== 10. SNAP-FIT PIVOT HINGED BATTERY DOOR ==================== -->
+  <link name="battery_door_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://ros2_diffdrive_description/meshes/battery_door.stl" scale="1.0 1.0 1.0"/>
+      </geometry>
+      <material name="door_hatch_blue"/>
+    </visual>
+    <collision>
+      <origin xyz="-0.0315 0.0001 0.0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.0614 0.0030 0.0308"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="-0.0315 0.0001 0.0" rpy="0 0 0"/>
+      <mass value="0.008"/>
+      <inertia ixx="1.0e-06" ixy="0.0" ixz="0.0" iyy="1.0e-06" iyz="0.0" izz="1.0e-06"/>
+    </inertial>
+  </link>
+
+  <joint name="battery_door_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="battery_door_link"/>
+    <origin xyz="0.1070 -0.0735 0.0045" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="0.0" upper="1.5708" effort="10.0" velocity="2.0"/>
+  </joint>
+
+  <!-- ========== 11. MPU9250 9-AXIS IMU (SUPPORT-TRIANGLE CENTROID) ========= -->
+  <link name="imu_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://ros2_diffdrive_description/meshes/imu_mpu9250.stl" scale="1.0 1.0 1.0"/>
+      </geometry>
+      <material name="pcb_blue"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 -0.003" rpy="0 0 0"/>
+      <geometry>
+        <box size="${imu_length} ${imu_width} ${imu_height}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.010"/>
+      <inertia ixx="1.0e-05" ixy="0.0" ixz="0.0"
+               iyy="1.0e-05" iyz="0.0"
+               izz="1.0e-05"/>
+    </inertial>
+  </link>
+
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="imu_link"/>
+    <origin xyz="${imu_x_offset} 0.0 ${imu_z_offset}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ================= 12. LDS02RR 360-DEG LASER SCANNER ================== -->
+  <link name="lidar_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://ros2_diffdrive_description/meshes/lds02rr_lidar.stl" scale="1.0 1.0 1.0"/>
+      </geometry>
+      <material name="matte_black_rubber"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="${lidar_body_radius}" length="${lidar_body_len}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 -0.015" rpy="0 0 0"/>
+      <mass value="0.125"/>
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0"
+               iyy="0.0001" iyz="0.0"
+               izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="lidar_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="lidar_link"/>
+    <origin xyz="${lidar_x_offset} 0.0 ${lidar_z_offset}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Alias frame laser_frame -> lidar_link for Nav2 / SLAM Toolbox compatibility -->
+  <link name="laser_frame"/>
+  <joint name="laser_frame_joint" type="fixed">
+    <parent link="lidar_link"/>
+    <child link="laser_frame"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ===================== 13. FRONT ESP32-CAM SENSOR ====================== -->
+  <link name="camera_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://ros2_diffdrive_description/meshes/esp32_cam.stl" scale="1.0 1.0 1.0"/>
+      </geometry>
+      <material name="matte_black_rubber"/>
+    </visual>
+    <collision>
+      <origin xyz="-0.0115 0 -0.0120" rpy="0 0 0"/>
+      <geometry>
+        <box size="${cam_thk} ${cam_wid} ${cam_hgt}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="-0.010 0 -0.010" rpy="0 0 0"/>
+      <mass value="0.030"/>
+      <inertia ixx="6.1e-06" ixy="0.0" ixz="0.0"
+               iyy="5.4e-06" iyz="0.0"
+               izz="3.5e-06"/>
+    </inertial>
+  </link>
+
+  <joint name="camera_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="camera_link"/>
+    <origin xyz="${cam_x_offset} 0.0 ${cam_z_offset}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Optical frame for Gazebo & ROS 2 camera pipelines (REP-104: +Z forward, +X right, +Y down) -->
+  <link name="camera_optical_link"/>
+  <joint name="camera_optical_joint" type="fixed">
+    <parent link="camera_link"/>
+    <child link="camera_optical_link"/>
+    <origin xyz="0 0 0" rpy="-1.5707963 0 -1.5707963"/>
+  </joint>
+
+  <!-- ======================================================================= -->
+  <!-- 14. ROS2_CONTROL & GAZEBO DRIVE PLUGINS (ported from my_bot)            -->
+  <!-- ======================================================================= -->
+  <xacro:if value="$(arg use_ros2_control)">
+    <xacro:if value="$(arg use_sim)">
+      <ros2_control name="GazeboSystem" type="system">
+        <hardware>
+          <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+        </hardware>
+        <joint name="left_wheel_joint">
+          <command_interface name="velocity">
+            <param name="min">-50</param>
+            <param name="max">50</param>
+          </command_interface>
+          <state_interface name="position"/>
+          <state_interface name="velocity"/>
+        </joint>
+        <joint name="right_wheel_joint">
+          <command_interface name="velocity">
+            <param name="min">-50</param>
+            <param name="max">50</param>
+          </command_interface>
+          <state_interface name="position"/>
+          <state_interface name="velocity"/>
+        </joint>
+      </ros2_control>
+      <gazebo>
+        <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
+          <robot_param>robot_description</robot_param>
+          <robot_param_node>robot_state_publisher</robot_param_node>
+          <parameters>$(find ros2_diffdrive_description)/config/my_bot_controllers.yaml</parameters>
+          <update_rate>50</update_rate>
+        </plugin>
+      </gazebo>
+    </xacro:if>
+
+    <xacro:unless value="$(arg use_sim)">
+      <ros2_control name="my_bot_system" type="system">
+        <hardware>
+          <plugin>my_bot_hardware/MyBotSystem</plugin>
+          <param name="left_ticks_topic">/left_motor_ticks</param>
+          <param name="right_ticks_topic">/right_motor_ticks</param>
+          <param name="cmd_vel_topic">/cmd_vel</param>
+          <param name="ticks_per_rev">${ticks_per_rev}</param>
+          <param name="wheel_radius">${wheel_radius}</param>
+          <param name="wheel_separation">${wheel_separation}</param>
+        </hardware>
+        <joint name="left_wheel_joint">
+          <command_interface name="velocity">
+            <param name="min">-50</param>
+            <param name="max">50</param>
+          </command_interface>
+          <state_interface name="position"/>
+          <state_interface name="velocity"/>
+        </joint>
+        <joint name="right_wheel_joint">
+          <command_interface name="velocity">
+            <param name="min">-50</param>
+            <param name="max">50</param>
+          </command_interface>
+          <state_interface name="position"/>
+          <state_interface name="velocity"/>
+        </joint>
+      </ros2_control>
+    </xacro:unless>
+  </xacro:if>
+
+  <!-- Legacy Gazebo diff_drive + joint_state_publisher fallback (when use_ros2_control:=false) -->
+  <xacro:unless value="$(arg use_ros2_control)">
+    <gazebo>
+      <plugin name="diff_drive" filename="libgazebo_ros_diff_drive.so">
+        <ros>
+          <namespace>/</namespace>
+        </ros>
+        <left_joint>left_wheel_joint</left_joint>
+        <right_joint>right_wheel_joint</right_joint>
+        <wheel_separation>${wheel_separation}</wheel_separation>
+        <wheel_diameter>${wheel_radius * 2.0}</wheel_diameter>
+        <max_wheel_torque>1.2</max_wheel_torque>
+        <max_wheel_acceleration>5.0</max_wheel_acceleration>
+        <command_topic>cmd_vel</command_topic>
+        <publish_odom>true</publish_odom>
+        <publish_odom_tf>$(arg publish_odom_tf)</publish_odom_tf>
+        <publish_wheel_tf>false</publish_wheel_tf>
+        <odometry_topic>odom</odometry_topic>
+        <odometry_frame>odom</odometry_frame>
+        <robot_base_frame>base_footprint</robot_base_frame>
+      </plugin>
+    </gazebo>
+
+    <gazebo>
+      <plugin name="gazebo_ros_joint_state_publisher" filename="libgazebo_ros_joint_state_publisher.so">
+        <ros>
+          <namespace>/</namespace>
+          <remapping>~/out:=joint_states</remapping>
+        </ros>
+        <update_rate>30</update_rate>
+        <joint_name>right_wheel_joint</joint_name>
+        <joint_name>left_wheel_joint</joint_name>
+      </plugin>
+    </gazebo>
+  </xacro:unless>
+
+  <!-- ======================================================================= -->
+  <!-- 15. GAZEBO SENSOR PLUGINS (IMU, 360° LiDAR, Front ESP32-CAM)            -->
+  <!-- ======================================================================= -->
+  <gazebo reference="imu_link">
+    <sensor name="imu_sensor" type="imu">
+      <always_on>true</always_on>
+      <visualize>true</visualize>
+      <update_rate>30</update_rate>
+      <plugin name="imu_plugin" filename="libgazebo_ros_imu_sensor.so">
+        <ros>
+          <namespace>/</namespace>
+          <remapping>~/out:=imu</remapping>
+        </ros>
+        <initial_orientation_as_reference>false</initial_orientation_as_reference>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <gazebo reference="lidar_link">
+    <sensor name="lidar" type="ray">
+      <pose>0 0 0 0 0 0</pose>
+      <always_on>true</always_on>
+      <visualize>true</visualize>
+      <update_rate>15</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>360</samples>
+            <resolution>1.0</resolution>
+            <min_angle>-3.1416</min_angle>
+            <max_angle>3.1416</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.05</min>
+          <max>3.5</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.005</stddev>
+        </noise>
+      </ray>
+      <plugin name="gazebo_ros_ray_sensor" filename="libgazebo_ros_ray_sensor.so">
+        <ros>
+          <namespace>/</namespace>
+          <remapping>~/out:=scan</remapping>
+        </ros>
+        <output_type>sensor_msgs/LaserScan</output_type>
+        <frame_name>lidar_link</frame_name>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <gazebo reference="camera_link">
+    <sensor name="front_camera" type="camera">
+      <pose>0 0 0 0 0 0</pose>
+      <always_on>true</always_on>
+      <visualize>true</visualize>
+      <update_rate>30</update_rate>
+      <camera name="front_camera">
+        <horizontal_fov>1.1345</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.05</near>
+          <far>10.0</far>
+        </clip>
+      </camera>
+      <plugin name="gazebo_ros_camera" filename="libgazebo_ros_camera.so">
+        <ros>
+          <namespace>/</namespace>
+        </ros>
+        <camera_name>front_camera</camera_name>
+        <frame_name>camera_optical_link</frame_name>
+        <min_depth>0.05</min_depth>
+        <max_depth>10.0</max_depth>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!-- ======================================================================= -->
+  <!-- 16. GAZEBO CONTACT & FRICTION PARAMETERS (anti-jitter)                  -->
+  <!-- ======================================================================= -->
+  <gazebo reference="right_wheel_link">
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+    <kp>1000000.0</kp>
+    <kd>100.0</kd>
+    <minDepth>0.001</minDepth>
+    <maxVel>0.0</maxVel>
+  </gazebo>
+
+  <gazebo reference="left_wheel_link">
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+    <kp>1000000.0</kp>
+    <kd>100.0</kd>
+    <minDepth>0.001</minDepth>
+    <maxVel>0.0</maxVel>
+  </gazebo>
+
+  <gazebo reference="caster_link">
+    <mu1>0.0</mu1>
+    <mu2>0.0</mu2>
+    <kp>1000000.0</kp>
+    <kd>100.0</kd>
+    <minDepth>0.001</minDepth>
+    <maxVel>0.0</maxVel>
+  </gazebo>
+
+  <gazebo reference="base_link">
+    <mu1>0.1</mu1>
+    <mu2>0.1</mu2>
+    <kp>1000000.0</kp>
+    <kd>100.0</kd>
+    <selfCollide>false</selfCollide>
+  </gazebo>
+
+</robot>

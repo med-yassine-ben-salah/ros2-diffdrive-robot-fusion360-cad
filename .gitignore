@@ -1,0 +1,16 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Fusion / CAD temp and backup files
+*.FCBak
+*.bak
+*.tmp
+*.log
+*.swp
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
