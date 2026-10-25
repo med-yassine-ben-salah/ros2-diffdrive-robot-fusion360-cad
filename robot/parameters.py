@@ -1,4 +1,4 @@
-﻿# Phase 3 â€” Single-source parametric constants and derivation chains.
+# Phase 3 â€” Single-source parametric constants and derivation chains.
 # No magic numbers in build scripts: every stage imports this module (and reloads it via importlib.reload).
 # Coordinate system (ROS 2 mobile robot standard, origin on ground under motor/wheel axle midpoint):
 #   X : forward (+X front, -X rear)
@@ -28,7 +28,7 @@ CLEAR_TIGHT       = 0.15   # snug locating seat
 CLEAR_MATING      = 0.25   # general mating clearance (brief: 0.2-0.4 mm)
 CLEAR_SLIDE       = 0.30   # sliding battery door rail clearance per side
 CLEAR_COVER       = 0.35   # removable upper shell clearance (brief: 0.3-0.5 mm)
-CLEAR_LIDAR_NECK  = 0.80   # radial gap around rotating LiDAR head
+CLEAR_LIDAR_NECK  = 1.80   # radial gap around rotating LiDAR head (widened by 1.0 mm radial / 2.0 mm diameter: Ø71.3 -> Ø73.3 mm)
 
 # ==============================================================================
 # 2. FASTENER PARAMETERS (M3 primary, M2 for OLED)
@@ -160,7 +160,7 @@ WHEEL_HUB_HOLE_R  = 11.00                           # Ã˜22.0 mm opening in sid
 # ==============================================================================
 # Measured from lds02rr.step and LDS02RR_Plate.stl:
 LIDAR_HEAD_R      = 34.85                           # lower collar r=34.85 (z in [-7.3, 1.5]), upper r=34.35 (z in [1.5, 18.5])
-LIDAR_NECK_CUT_R  = LIDAR_HEAD_R + CLEAR_LIDAR_NECK # 35.65 mm (Ã˜71.3 mm circular opening around rotating turret)
+LIDAR_NECK_CUT_R  = LIDAR_HEAD_R + CLEAR_LIDAR_NECK # 36.65 mm (Ø73.3 mm circular opening around rotating turret)
 LIDAR_PLATE_Z_LOCAL_BOT = 88.60
 LIDAR_PLATE_Z_LOCAL_TOP = 92.60
 # In untransformed LDS02RR_Plate.stl, the 4 mounting posts have their locating pin tips at Z = 109.20 mm
